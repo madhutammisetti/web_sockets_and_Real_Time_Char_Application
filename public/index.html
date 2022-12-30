@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>This is chat Application</h1>
+    <br>
+    <div id="status">
+
+    </div>
+    <input type="text" placeholder="Name" id="name">
+    <br>
+    <input type="text" placeholder="Message" id="msg">
+    <br>
+    <button onclick="sendmessage()">Send</button>
+
+    <div id="message-container"> 
+
+    </div>
+
+    <!-- add socket in html file  -->
+    <script src="http://localhost:8080/socket.io/socket.io.js"></script> 
+    
+    
+    <script>
+    
+    const clientSocket = io();  //Making connection from client to server
+    
+        var count = 0   
+        clientSocket.on("status" ,(msg)=>{  // event lister , this is to display the how many users are connected to server.
+            count++
+            console.log(msg)
+            document.getElementById("status").innerHTML = `<p>${msg}:${count}</p>`
+        })
+
+        clientSocket.on("disconnection" ,()=>{  // reducing the connected list , when user disconnected..
+            count--
+            document.getElementById("status").innerHTML = `<p> users connected :${count}</p>`
+        })
+
+
+    clientSocket.on("message" ,(msg)=>{  // It will receive user msg from server 
+    console.log(msg)
+
+    if(msg.name == document.getElementById("name").value){
+        document.getElementById("message-container").innerHTML += `<p> you : ${msg.message} </P>`  // displaying name and msg in web page 
+    }else{
+        document.getElementById("message-container").innerHTML += `<p> ${msg.name} : ${msg.message} </P>`  // displaying name and msg in web page
+    } 
+    })
+
+    function sendmessage(){
+        var user_name = document.getElementById("name").value;
+        var user_msg = document.getElementById("msg").value;
+        clientSocket.emit("message" , {name:user_name,message:user_msg}) // Need to send msg from client to server and server to send that msg to other client
+    }
+    
+    
+    
+    </script>
+
+    
+
+
+</body>
+</html>
